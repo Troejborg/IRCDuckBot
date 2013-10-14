@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="TestBot">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/artifacts/TestBot_jar/TestBot.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

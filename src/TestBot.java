@@ -1,8 +1,8 @@
+import BattleGame.BattleGame;
 import org.jibble.pircbot.PircBot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,6 +13,7 @@ import java.util.Random;
  */
 public class TestBot extends PircBot{
   String lastMsg = "null", lastSender = "null";
+  private static String BATTLE_CMD = "!battle ";
   List<String> superAuthedUsers = new ArrayList<String>();
   List<String> authedUsers = new ArrayList<String>();
   List<String> users = new ArrayList<String>();
@@ -37,13 +38,9 @@ public class TestBot extends PircBot{
 
   }
   protected void onConnect(){
-    sendMessage("NickServ", "identify trolol");
+    sendMessage("NickServ", "identify 200687");
   }
   protected void onJoin(String channel, String sender, String login, String hostname) {
-    if(superAuthedUsers.contains(sender))
-      op(channel, sender);
-    else if(authedUsers.contains(sender))
-      voice(channel, sender);
 
     if(!users.contains(sender)){
       if(sender != getName())
@@ -56,12 +53,23 @@ public class TestBot extends PircBot{
 
   }
 
+
+  public void onNickChange(String s, String s2, String s3, String s4) {
+    super.onNickChange(s, s2, s3, s4);    //To change body of overridden methods use File | Settings | File Templates.
+  }
+
   public void onMessage(String channel, String sender,
                         String login, String hostname, String message) {
     String response;
     if (message.equalsIgnoreCase("!time")) {
       String time = new java.util.Date().toString();
       sendMessage(channel, sender + ": The time is now " + time);
+    }
+    if(message.equalsIgnoreCase("hello steamduck")){
+      if(superAuthedUsers.contains(sender)){
+        sendMessage(channel, "Hey there, " + sender + ". youre my favourite person!");
+      }else
+        sendMessage(channel, "go away, peasant.");
     }
     else if(message.equalsIgnoreCase("!martin")){
       response = "http://www.cupcakeserver.dk/hvordanharmartindet";
@@ -71,10 +79,19 @@ public class TestBot extends PircBot{
       sendMessage(channel, sender + ": This was the last message I recorded:");
       sendMessage(channel, lastSender + ": " + lastMsg);
     }
+    else if(message.startsWith(BATTLE_CMD)){
+      String playerOne = "lite_";
+      String playerTwo = "Xty";
+      initGame(playerOne, playerTwo);
+    }
     if(sender != getNick()){
       lastMsg = message;
       lastSender = sender;
     }
+  }
+
+  private void initGame(String playerOne, String playerTwo) {
+    BattleGame newGame = new BattleGame(playerTwo, playerTwo);
   }
 
   private void adminCmd(String channel, String sender,String cmd){
@@ -108,7 +125,6 @@ public class TestBot extends PircBot{
           sendMessage(channel, sender + ": removed auth from user " + newUser);
         }else
           sendMessage(channel, "Sorry, " + sender + ". I couldn't find " + newUser + " :(");
-
       }
     }
   }
