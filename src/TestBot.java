@@ -1,8 +1,9 @@
-import BattleGame.BattleGame;
 import org.jibble.pircbot.PircBot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,10 +14,18 @@ import java.util.List;
  */
 public class TestBot extends PircBot{
   String lastMsg = "null", lastSender = "null";
-  private static String BATTLE_CMD = "!battle ";
+  private String currentChannel = "#ithivemind";
+  private static String BATTLE_START = "!battle start ";
+  private static String BATTLE_CREATE = "!battle create";
+  private static String BATTLE_NEXT_ROUND = "!battle next";
+  private static String ECHO = "!echo ";
+  Player playerOne, playerTwo;
   List<String> superAuthedUsers = new ArrayList<String>();
   List<String> authedUsers = new ArrayList<String>();
   List<String> users = new ArrayList<String>();
+  Map<String,Player> players = new HashMap<String, Player>();
+  BattleGame activeGame;
+
   public TestBot() {
     this.setName("steamduck");
 
@@ -75,14 +84,28 @@ public class TestBot extends PircBot{
       response = "http://www.cupcakeserver.dk/hvordanharmartindet";
       sendMessage(channel, response);
     }
+    else if(message.startsWith(ECHO)){
+      sendMessage(channel, message.substring(ECHO.length()));
+    }
     else if(message.equalsIgnoreCase("!lastmsg")){
       sendMessage(channel, sender + ": This was the last message I recorded:");
       sendMessage(channel, lastSender + ": " + lastMsg);
     }
-    else if(message.startsWith(BATTLE_CMD)){
-      String playerOne = "lite_";
-      String playerTwo = "Xty";
-      initGame(playerOne, playerTwo);
+    else if(message.contentEquals(BATTLE_CREATE)){
+      if(players.get(sender) == null){
+        players.put(sender, new Player(sender));
+        sendMessage(channel, sender + " has been added to the player database");
+      }else
+        sendMessage(channel, sender + " already exists in my database");
+    }
+    else if(message.startsWith(BATTLE_START)){
+      initGame(sender, message.substring(BATTLE_START.length()));
+      startGame();
+      if(!activeGame.isGameOver())
+        playNextRound();
+    }
+    else if(message.startsWith(BATTLE_NEXT_ROUND)){
+      playNextRound();
     }
     if(sender != getNick()){
       lastMsg = message;
@@ -90,8 +113,47 @@ public class TestBot extends PircBot{
     }
   }
 
-  private void initGame(String playerOne, String playerTwo) {
-    BattleGame newGame = new BattleGame(playerTwo, playerTwo);
+  private void playNextRound() {
+    activeGame.startNextRound();
+    sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
+    sendMessage(currentChannel, "...does " + activeGame.getLastDamageRoll() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
+    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " however gives zero fucks. He stands his ground and blocks a total of " + activeGame.getLastDefenseRoll() + " damage" );
+
+    if(!activeGame.isGameOver()){
+      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
+      sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has " + activeGame.getAttackingPlayer().getCurrentHealth() + " health remaining.");
+      sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
+    }
+    else
+    {
+      if(activeGame.getDefendingPlayer().getCurrentHealth() <= 0){
+        sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+      }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
+        sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+        sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
+      }
+    }
+  }
+
+  private void startGame() {
+    activeGame.StartMatch();
+    sendMessage(currentChannel, "!!!MATCH STARTED!!!");
+    sendMessage(currentChannel, "Rolling the dice to see who gets to start strike first...");
+    sendMessage(currentChannel, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
+    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
+  }
+
+  private void initGame(String playerOneName, String playerTwoName) {
+
+    playerOne = new Player("lite_");
+    playerTwo = new Player("Cupcake");
+    //playerOne = players.get(playerOneName);
+    //playerTwo = players.get(playerTwoName);
+    if(playerOne == null || playerTwo == null ){
+      sendMessage(currentChannel, "No player named " + (playerOne == null ? playerOneName : playerTwoName) + " found in database. To create yourself type '!battle create'");
+      return;
+    }else
+      activeGame = new BattleGame(playerOne, playerTwo);
   }
 
   private void adminCmd(String channel, String sender,String cmd){
