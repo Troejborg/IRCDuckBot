@@ -29,8 +29,6 @@ public class TestBot extends PircBot{
 
   public TestBot() {
     this.setName("steamduck");
-
-    superAuthedUsers.add("ThomasCle");
     superAuthedUsers.add("lite_");
   }
   public static void main(String[] args) throws Exception {
@@ -59,6 +57,11 @@ public class TestBot extends PircBot{
         sendMessage(channel, "RAWR!");
 
       users.add(sender);
+      Player steamduck = new Player("steamduck");
+      steamduck.setDamageRating(10000);
+      steamduck.setLevel(99);
+      players.put("steamduck", steamduck);
+
     }
 
   }
@@ -114,7 +117,7 @@ public class TestBot extends PircBot{
     else if(message.startsWith(BATTLE_STATS)){
       Player player = players.get(message.substring(BATTLE_STATS.length()));
       if(player != null)
-        sendMessage(channel, player.getPlayerName() + " has " + player.getWins() + " wins and " + player.getLosses() + " losses.");
+        sendMessage(channel, player.getPlayerName() + " is level " + player.getLevel() + ", has " + player.getWins() + " wins and " + player.getLosses() + " losses.");
       else
         sendMessage(channel, "Could not find player in database");
     }
@@ -137,12 +140,18 @@ public class TestBot extends PircBot{
     {
       if(activeGame.getDefendingPlayer().getCurrentHealth() <= 0){
         sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+        sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getAttackingPlayer().getPlayerName() + "! Youve won this game!");
+        activeGame.getDefendingPlayer().AddLoss();
+        activeGame.getAttackingPlayer().AddWin();
+        players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
+        players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
       }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
         sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
         sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
         activeGame.getDefendingPlayer().AddWin();
         activeGame.getAttackingPlayer().AddLoss();
         players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
+        players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
       }
     }
   }
@@ -169,6 +178,8 @@ public class TestBot extends PircBot{
     if(cmd.equalsIgnoreCase("!op me")){
       if(superAuthedUsers.contains(sender))
         op(channel, sender);
+      else
+        sendMessage(channel, "You're not my real dad!");
     }
     else if(cmd.equalsIgnoreCase("!voice me")){
       if(superAuthedUsers.contains(sender))

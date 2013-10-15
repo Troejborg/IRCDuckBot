@@ -66,6 +66,9 @@ public class Player {
   public int getDamageRating() {
     return damageRating*(int)damageMod;
   }
+  public void setDamageRating(int dmg){
+    damageMod = dmg;
+  }
 
   public int getDefenseRating() {
     return defenseRating;
@@ -92,5 +95,11 @@ public class Player {
   }
   public int getLosses(){
     return losses;
+  }
+  public void setLevel(int level){
+    this.level = level;
+  }
+  public int getLevel(){
+    return level;
   }
 }
