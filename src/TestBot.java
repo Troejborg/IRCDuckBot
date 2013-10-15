@@ -17,6 +17,7 @@ public class TestBot extends PircBot{
   private String currentChannel = "#ithivemind";
   private static String BATTLE_START = "!battle start ";
   private static String BATTLE_CREATE = "!battle create";
+  private static String BATTLE_STATS = "!battle stats ";
   private static String BATTLE_NEXT_ROUND = "!battle next";
   private static String ECHO = "!echo ";
   Player playerOne, playerTwo;
@@ -74,6 +75,9 @@ public class TestBot extends PircBot{
       String time = new java.util.Date().toString();
       sendMessage(channel, sender + ": The time is now " + time);
     }
+    if(message.equalsIgnoreCase("!op me") && superAuthedUsers.contains(sender)){
+      op(channel, sender);
+    }
     if(message.equalsIgnoreCase("hello steamduck")){
       if(superAuthedUsers.contains(sender)){
         sendMessage(channel, "Hey there, " + sender + ". youre my favourite person!");
@@ -101,11 +105,18 @@ public class TestBot extends PircBot{
     else if(message.startsWith(BATTLE_START)){
       initGame(sender, message.substring(BATTLE_START.length()));
       startGame();
-      if(!activeGame.isGameOver())
+      while(!activeGame.isGameOver())
         playNextRound();
     }
     else if(message.startsWith(BATTLE_NEXT_ROUND)){
       playNextRound();
+    }
+    else if(message.startsWith(BATTLE_STATS)){
+      Player player = players.get(message.substring(BATTLE_STATS.length()));
+      if(player != null)
+        sendMessage(channel, player.getPlayerName() + " has " + player.getWins() + " wins and " + player.getLosses() + " losses.");
+      else
+        sendMessage(channel, "Could not find player in database");
     }
     if(sender != getNick()){
       lastMsg = message;
@@ -116,12 +127,10 @@ public class TestBot extends PircBot{
   private void playNextRound() {
     activeGame.startNextRound();
     sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
-    sendMessage(currentChannel, "...does " + activeGame.getLastDamageRoll() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
-    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " however gives zero fucks. He stands his ground and blocks a total of " + activeGame.getLastDefenseRoll() + " damage" );
+    sendMessage(currentChannel, "...does " + activeGame.getLastResultingDamage() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
 
     if(!activeGame.isGameOver()){
       sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
-      sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has " + activeGame.getAttackingPlayer().getCurrentHealth() + " health remaining.");
       sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
     }
     else
@@ -131,6 +140,9 @@ public class TestBot extends PircBot{
       }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
         sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
         sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
+        activeGame.getDefendingPlayer().AddWin();
+        activeGame.getAttackingPlayer().AddLoss();
+        players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
       }
     }
   }
@@ -144,11 +156,8 @@ public class TestBot extends PircBot{
   }
 
   private void initGame(String playerOneName, String playerTwoName) {
-
-    playerOne = new Player("lite_");
-    playerTwo = new Player("Cupcake");
-    //playerOne = players.get(playerOneName);
-    //playerTwo = players.get(playerTwoName);
+    playerOne = players.get(playerOneName);
+    playerTwo = players.get(playerTwoName);
     if(playerOne == null || playerTwo == null ){
       sendMessage(currentChannel, "No player named " + (playerOne == null ? playerOneName : playerTwoName) + " found in database. To create yourself type '!battle create'");
       return;

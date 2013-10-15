@@ -38,10 +38,12 @@ public class Player {
 
   private void initAttributes(Random playerRandomizer) {
     level = 1;
+    wins = 0;
+    losses = 0;
     totalExp = 0;
     damageRating = 10;
     defenseRating = 10;
-    totalHealth = 50;
+    totalHealth = 15;
     currentHealth = totalHealth;
     damageMod = 1.5;
   }
@@ -75,5 +77,20 @@ public class Player {
 
   public boolean getIsAlive() {
     return isAlive;
+  }
+
+  public void AddWin(){
+    wins++;
+  }
+
+  public void AddLoss(){
+    losses++;
+  }
+
+  public int getWins(){
+    return wins;
+  }
+  public int getLosses(){
+    return losses;
   }
 }
