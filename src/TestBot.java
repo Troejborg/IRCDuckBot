@@ -13,12 +13,16 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class TestBot extends PircBot{
+  private static final String OP_OWNER = "!op me";
+  public static final String THE_TIME = "!time";
+  public static final String LAST_MSG = "!lastmsg";
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
   private static String BATTLE_START = "!battle start ";
   private static String BATTLE_CREATE = "!battle create";
   private static String BATTLE_STATS = "!battle stats ";
   private static String BATTLE_NEXT_ROUND = "!battle next";
+  private static String HELLO_STEAMDUCK = "hello steamduck";
   private static String ECHO = "!echo ";
   Player playerOne, playerTwo;
   List<String> superAuthedUsers = new ArrayList<String>();
@@ -74,14 +78,14 @@ public class TestBot extends PircBot{
   public void onMessage(String channel, String sender,
                         String login, String hostname, String message) {
     String response;
-    if (message.equalsIgnoreCase("!time")) {
+    if (message.equalsIgnoreCase(THE_TIME)) {
       String time = new java.util.Date().toString();
       sendMessage(channel, sender + ": The time is now " + time);
     }
-    if(message.equalsIgnoreCase("!op me") && superAuthedUsers.contains(sender)){
+    if(message.equalsIgnoreCase(OP_OWNER) && superAuthedUsers.contains(sender)){
       op(channel, sender);
     }
-    if(message.equalsIgnoreCase("hello steamduck")){
+    if(message.equalsIgnoreCase(HELLO_STEAMDUCK)){
       if(superAuthedUsers.contains(sender)){
         sendMessage(channel, "Hey there, " + sender + ". youre my favourite person!");
       }else
@@ -94,7 +98,7 @@ public class TestBot extends PircBot{
     else if(message.startsWith(ECHO)){
       sendMessage(channel, message.substring(ECHO.length()));
     }
-    else if(message.equalsIgnoreCase("!lastmsg")){
+    else if(message.equalsIgnoreCase(LAST_MSG)){
       sendMessage(channel, sender + ": This was the last message I recorded:");
       sendMessage(channel, lastSender + ": " + lastMsg);
     }
@@ -106,13 +110,16 @@ public class TestBot extends PircBot{
         sendMessage(channel, sender + " already exists in my database");
     }
     else if(message.startsWith(BATTLE_START)){
-      initGame(sender, message.substring(BATTLE_START.length()));
-      startGame();
-      while(!activeGame.isGameOver()){
-        playNextRound();
-        sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
+      if(initGame(sender, message.substring(BATTLE_START.length()))){
+        startGame();
+        setMessageDelay(4000l);
+        while(!activeGame.isGameOver()){
+          playNextRound();
+          sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
+        }
+        determineWinner();
       }
-      determineWinner();
+
     }
     else if(message.startsWith(BATTLE_NEXT_ROUND)){
       playNextRound();
@@ -159,24 +166,31 @@ public class TestBot extends PircBot{
     sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
     sendMessage(currentChannel, "...does " + activeGame.getLastResultingDamage() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
     sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
+    activeGame.switchTurns();
   }
 
   private void startGame() {
-    activeGame.StartMatch();
-    sendMessage(currentChannel, "!!!MATCH STARTED!!!");
-    sendMessage(currentChannel, "Rolling the dice to see who gets to strike first...");
-    sendMessage(currentChannel, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
-    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
+
+    if(activeGame.StartMatch()){
+      sendMessage(currentChannel, "!!!MATCH STARTED!!!");
+      sendMessage(currentChannel, "Rolling the dice to see who gets to strike first...");
+      sendMessage(currentChannel, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
+      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
+    }
+
   }
 
-  private void initGame(String playerOneName, String playerTwoName) {
+  private boolean initGame(String playerOneName, String playerTwoName) {
     playerOne = players.get(playerOneName);
     playerTwo = players.get(playerTwoName);
     if(playerOne == null || playerTwo == null ){
       sendMessage(currentChannel, "No player named " + (playerOne == null ? playerOneName : playerTwoName) + " found in database. To create yourself type '!battle create'");
-      return;
-    }else
+      return false;
+    }else{
       activeGame = new BattleGame(playerOne, playerTwo);
+      return true;
+    }
+
   }
 
   private void adminCmd(String channel, String sender,String cmd){
