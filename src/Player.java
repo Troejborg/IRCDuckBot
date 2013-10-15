@@ -16,7 +16,7 @@ public class Player {
   private int losses;
   private int damageRating;
   private int defenseRating;
-  private int totalHealth;
+  private int maxHealth;
   private boolean isAlive;
   private int currentHealth;
   private Random playerRandomizer;
@@ -43,8 +43,8 @@ public class Player {
     totalExp = 0;
     damageRating = 10;
     defenseRating = 10;
-    totalHealth = 15;
-    currentHealth = totalHealth;
+    maxHealth = 15;
+    currentHealth = maxHealth;
     damageMod = 1.5;
   }
 
@@ -101,5 +101,13 @@ public class Player {
   }
   public int getLevel(){
     return level;
+  }
+
+  public int getMaxHealth() {
+    return maxHealth;
+  }
+
+  public void setCurrentHealth(int currentHealth) {
+    this.currentHealth = currentHealth;
   }
 }

@@ -64,7 +64,7 @@ public class BattleGame
     lastDamageRoll = randomizer.nextInt(LEET_ROLLER)%attackingPlayer.getDamageRating();
     lastDefenseRoll = randomizer.nextInt(LEET_ROLLER)%defendingPlayer.getDefenseRating();
     lastResultingDamage = lastDamageRoll - lastDefenseRoll > 0 ? lastDamageRoll - lastDefenseRoll : 0;
-    defendingPlayer.setIncomingDamage((lastResultingDamage > 0 ? lastResultingDamage : 0));
+    defendingPlayer.setIncomingDamage((lastResultingDamage));
 
     if(defendingPlayer.getCurrentHealth() <= 0)
       defendingPlayer.setIsAlive(false);

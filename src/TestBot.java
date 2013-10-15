@@ -108,8 +108,11 @@ public class TestBot extends PircBot{
     else if(message.startsWith(BATTLE_START)){
       initGame(sender, message.substring(BATTLE_START.length()));
       startGame();
-      while(!activeGame.isGameOver())
+      while(!activeGame.isGameOver()){
         playNextRound();
+        sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
+      }
+      determineWinner();
     }
     else if(message.startsWith(BATTLE_NEXT_ROUND)){
       playNextRound();
@@ -127,39 +130,41 @@ public class TestBot extends PircBot{
     }
   }
 
+  private void determineWinner() {
+    if(activeGame.getDefendingPlayer().getCurrentHealth() <= 0){
+      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+      sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getAttackingPlayer().getPlayerName() + "! Youve won this game!");
+      activeGame.getDefendingPlayer().AddLoss();
+      activeGame.getAttackingPlayer().AddWin();
+    }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
+      sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+      sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
+      activeGame.getDefendingPlayer().AddWin();
+      activeGame.getAttackingPlayer().AddLoss();
+    }
+    clearPlayer(activeGame.getDefendingPlayer());
+    clearPlayer(activeGame.getAttackingPlayer());
+
+    players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
+    players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
+  }
+
+  private void clearPlayer(Player player) {
+    player.setCurrentHealth(activeGame.getAttackingPlayer().getMaxHealth());
+    player.setIsAlive(true);
+  }
+
   private void playNextRound() {
     activeGame.startNextRound();
     sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
     sendMessage(currentChannel, "...does " + activeGame.getLastResultingDamage() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
-
-    if(!activeGame.isGameOver()){
-      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
-      sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
-    }
-    else
-    {
-      if(activeGame.getDefendingPlayer().getCurrentHealth() <= 0){
-        sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-        sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getAttackingPlayer().getPlayerName() + "! Youve won this game!");
-        activeGame.getDefendingPlayer().AddLoss();
-        activeGame.getAttackingPlayer().AddWin();
-        players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
-        players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
-      }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
-        sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-        sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
-        activeGame.getDefendingPlayer().AddWin();
-        activeGame.getAttackingPlayer().AddLoss();
-        players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
-        players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
-      }
-    }
+    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
   }
 
   private void startGame() {
     activeGame.StartMatch();
     sendMessage(currentChannel, "!!!MATCH STARTED!!!");
-    sendMessage(currentChannel, "Rolling the dice to see who gets to start strike first...");
+    sendMessage(currentChannel, "Rolling the dice to see who gets to strike first...");
     sendMessage(currentChannel, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
     sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
   }
