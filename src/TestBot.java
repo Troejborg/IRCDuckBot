@@ -18,6 +18,7 @@ public class TestBot extends PircBot{
   public static final String LAST_MSG = "!lastmsg";
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
+  private static String BATTLE_CHAN = "#ithivemind-game";
   private static String BATTLE_START = "!battle start ";
   private static String BATTLE_CREATE = "!battle create";
   private static String BATTLE_STATS = "!battle stats ";
@@ -45,8 +46,9 @@ public class TestBot extends PircBot{
     // Connect to the IRC server.
     bot.connect("irc.freenode.net");
 
-    // Join the #pircbot channel.
+    // Join the channels.
     bot.joinChannel("#ithivemind");
+    bot.joinChannel("#ithivemind-game");
 
   }
   protected void onConnect(){
@@ -62,8 +64,7 @@ public class TestBot extends PircBot{
 
       users.add(sender);
       Player steamduck = new Player("steamduck");
-      steamduck.setDamageRating(10000);
-      steamduck.setLevel(99);
+      steamduck.setLevel(1);
       players.put("steamduck", steamduck);
 
     }
@@ -112,11 +113,11 @@ public class TestBot extends PircBot{
     else if(message.startsWith(BATTLE_START)){
       if(initGame(sender, message.substring(BATTLE_START.length()))){
         startGame();
-        setMessageDelay(4000l);
-        while(!activeGame.isGameOver()){
+        setMessageDelay(1000l);
+        while(!activeGame.evalIsGameOver()){
           playNextRound();
           sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
-        }
+        };
         determineWinner();
       }
 
@@ -138,27 +139,22 @@ public class TestBot extends PircBot{
   }
 
   private void determineWinner() {
-    if(activeGame.getDefendingPlayer().getCurrentHealth() <= 0){
-      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-      sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getAttackingPlayer().getPlayerName() + "! Youve won this game!");
-      activeGame.getDefendingPlayer().AddLoss();
-      activeGame.getAttackingPlayer().AddWin();
-    }else if(activeGame.getAttackingPlayer().getCurrentHealth() <= 0){
-      sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-      sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getDefendingPlayer().getPlayerName() + "! Youve won this game!");
-      activeGame.getDefendingPlayer().AddWin();
-      activeGame.getAttackingPlayer().AddLoss();
-    }
-    clearPlayer(activeGame.getDefendingPlayer());
-    clearPlayer(activeGame.getAttackingPlayer());
+    activeGame.setMatchExp();
+    sendMessage(currentChannel, activeGame.getLoser().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+    sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getWinner().getPlayerName() + "! Youve won this game!");
 
-    players.put(activeGame.getDefendingPlayer().getPlayerName(), activeGame.getDefendingPlayer());
-    players.put(activeGame.getAttackingPlayer().getPlayerName(), activeGame.getAttackingPlayer());
-  }
+    sendMessage(currentChannel, "!!!POST GAME!!!");
+    sendMessage(currentChannel, activeGame.getWinner().getPlayerName() + " gained " + activeGame.getWinningExp() + "xp and "+activeGame.getLoser().getPlayerName() + " gained " + activeGame.getLosingExp() + "xp for fighting in this match");
+    if(activeGame.grantWinnngExp())
+      sendMessage(currentChannel, "What's this? " + activeGame.getWinner().getPlayerName() + " is evolving! He is now level " + activeGame.getWinner().getLevel() + "!");
+    if(activeGame.grantLosingExp())
+      sendMessage(currentChannel, "What's this? " + activeGame.getLoser().getPlayerName() + " is evolving! He is now level " + activeGame.getLoser().getLevel() + "!");
+    activeGame.clearPlayers();
 
-  private void clearPlayer(Player player) {
-    player.setCurrentHealth(activeGame.getAttackingPlayer().getMaxHealth());
-    player.setIsAlive(true);
+    players.put(activeGame.getWinner().getPlayerName(), activeGame.getWinner());
+    players.put(activeGame.getLoser().getPlayerName(), activeGame.getLoser());
+
+
   }
 
   private void playNextRound() {

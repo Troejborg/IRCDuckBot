@@ -10,11 +10,14 @@ import java.util.Random;
 public class BattleGame
 {
   private static int LEET_ROLLER = 1337;
-  private Player attackingPlayer, defendingPlayer;
+  private Player attackingPlayer, defendingPlayer, winningPlayer, losingPlayer;
   private Random randomizer;
   public int RoundNumber;
   private int lastDamageRoll, lastDefenseRoll, lastResultingDamage;
   boolean isMatchOngoing = false;
+  private int matchExpWin;
+  private int matchExpLoss;
+
   public BattleGame(Player playerOne, Player playerTwo){
     long rgenseed = System.currentTimeMillis();
     randomizer = new Random();
@@ -83,13 +86,50 @@ public class BattleGame
     attackingPlayer = tempPlayer;
   }
 
-  public boolean isGameOver(){
-    if(isMatchOngoing && attackingPlayer.getIsAlive() && defendingPlayer.getIsAlive()){
+  public boolean evalIsGameOver(){
+    if(attackingPlayer.getIsAlive() && defendingPlayer.getIsAlive()){
       return false;
     }
     else{
+      winningPlayer = attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
+      losingPlayer = !attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
       isMatchOngoing = false;
       return true;
     }
+  }
+
+  public void setMatchExp(){
+    matchExpWin = (winningPlayer.getLevel()*5) + 45 - 45*(Math.round((losingPlayer.getLevel()-winningPlayer.getLevel())*0.5f));
+    matchExpLoss = (losingPlayer.getLevel()*5) + 15 - 15*(Math.round((losingPlayer.getLevel()-winningPlayer.getLevel())*0.5f));
+  }
+
+  public int getWinningExp(){
+    return matchExpWin;
+  }
+
+  public int getLosingExp(){
+    return matchExpLoss;
+  }
+  public boolean grantWinnngExp(){
+    winningPlayer.AddWin();
+    return winningPlayer.grantExp(matchExpWin);
+  }
+
+  public boolean grantLosingExp(){
+    losingPlayer.AddLoss();
+    return losingPlayer.grantExp(matchExpLoss);
+  }
+
+  public Player getWinner() {
+    return winningPlayer;
+  }
+
+  public Player getLoser() {
+    return losingPlayer;
+  }
+
+  public void clearPlayers() {
+    attackingPlayer.revitalize();
+    defendingPlayer.revitalize();
   }
 }

@@ -9,6 +9,8 @@ import java.util.Random;
  */
 public class Player {
   private int level;
+  private static int MAX_LEVEL = 100;
+  private static int XP_NEEDED_FIRST_LEVEL = 69;
   private int totalExp;
   private String playerName;
   private Weapon weapon;
@@ -22,6 +24,8 @@ public class Player {
   private Random playerRandomizer;
   private double damageMod;
   private int attackRating;
+  private int xpNeededForLevel;
+  private double defenseMod;
 
   public Player(String name){
     CreateNewPlayer(name);
@@ -41,11 +45,13 @@ public class Player {
     wins = 0;
     losses = 0;
     totalExp = 0;
+    xpNeededForLevel = XP_NEEDED_FIRST_LEVEL;
     damageRating = 10;
     defenseRating = 10;
     maxHealth = 15;
     currentHealth = maxHealth;
     damageMod = 1.5;
+    defenseMod = 1;
   }
 
   public int getCurrentHealth(){
@@ -67,7 +73,7 @@ public class Player {
     return damageRating*(int)damageMod;
   }
   public void setDamageRating(int dmg){
-    damageMod = dmg;
+    damageRating = dmg;
   }
 
   public int getDefenseRating() {
@@ -109,5 +115,47 @@ public class Player {
 
   public void setCurrentHealth(int currentHealth) {
     this.currentHealth = currentHealth;
+  }
+
+  public boolean grantExp(int expGain){
+    totalExp = totalExp + expGain;
+    if(totalExp >= xpNeededForLevel){
+      xpNeededForLevel = xpNeededForLevel + Math.round(xpNeededForLevel*1.1f);
+      doLevelUp();
+      return true;
+    }
+    else return false;
+  }
+
+  private void doLevelUp() {
+    level++;
+    setDamageMod(damageMod * 1.2d);
+    setDefenseMod(defenseMod * 1.2d);
+    setMaxHealth(Math.round(maxHealth*1.2f));
+  }
+
+  private int getExpNeededForNextLevel(){
+    return xpNeededForLevel - totalExp;
+  }
+
+  public void setDamageMod(double damageMod) {
+    this.damageMod = damageMod;
+  }
+
+  public void setDefenseMod(double defenseMod) {
+    this.defenseMod = defenseMod;
+  }
+
+  public double getDefenseMod() {
+    return defenseMod;
+  }
+
+  public void setMaxHealth(int maxHealth) {
+    this.maxHealth = maxHealth;
+  }
+
+  public void revitalize() {
+    setCurrentHealth(maxHealth);
+    setIsAlive(true);
   }
 }
