@@ -99,8 +99,15 @@ public class BattleGame
   }
 
   public void setMatchExp(){
-    matchExpWin = (winningPlayer.getLevel()*5) + 45 - 45*(Math.round((losingPlayer.getLevel()-winningPlayer.getLevel())*0.5f));
-    matchExpLoss = (losingPlayer.getLevel()*5) + 15 - 15*(Math.round((losingPlayer.getLevel()-winningPlayer.getLevel())*0.5f));
+    // TODO : FIX THIS
+    float multiplier = 1+(losingPlayer.getLevel()-winningPlayer.getLevel())*0.1f;
+    multiplier = multiplier >= 0 ? multiplier : 0;
+
+    matchExpWin = winningPlayer.getLevel()*5 + 45;
+    matchExpWin = Math.round(matchExpWin*multiplier);
+
+    matchExpLoss = losingPlayer.getLevel()*5 + 15;
+    matchExpLoss = Math.round(matchExpLoss*multiplier);
   }
 
   public int getWinningExp(){

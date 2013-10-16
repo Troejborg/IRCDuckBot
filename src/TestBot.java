@@ -93,6 +93,7 @@ public class TestBot extends PircBot{
         sendMessage(channel, "go away, peasant.");
     }
     else if(message.equalsIgnoreCase("!martin")){
+      setMessageDelay(1000l);
       response = "http://www.cupcakeserver.dk/hvordanharmartindet";
       sendMessage(channel, response);
     }
@@ -113,10 +114,10 @@ public class TestBot extends PircBot{
     else if(message.startsWith(BATTLE_START)){
       if(initGame(sender, message.substring(BATTLE_START.length()))){
         startGame();
-        setMessageDelay(1000l);
+        setMessageDelay(3000l);
         while(!activeGame.evalIsGameOver()){
           playNextRound();
-          sendMessage(currentChannel, "END OF ROUND " + activeGame.RoundNumber + "!");
+          sendMessage(BATTLE_CHAN, "END OF ROUND " + activeGame.RoundNumber + "!");
         };
         determineWinner();
       }
@@ -139,39 +140,47 @@ public class TestBot extends PircBot{
   }
 
   private void determineWinner() {
+    boolean levelUpWinner = false, levelUpLoser = false;
     activeGame.setMatchExp();
-    sendMessage(currentChannel, activeGame.getLoser().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-    sendMessage(currentChannel, "CONGRATUALATIONS " + activeGame.getWinner().getPlayerName() + "! Youve won this game!");
-
-    sendMessage(currentChannel, "!!!POST GAME!!!");
-    sendMessage(currentChannel, activeGame.getWinner().getPlayerName() + " gained " + activeGame.getWinningExp() + "xp and "+activeGame.getLoser().getPlayerName() + " gained " + activeGame.getLosingExp() + "xp for fighting in this match");
-    if(activeGame.grantWinnngExp())
-      sendMessage(currentChannel, "What's this? " + activeGame.getWinner().getPlayerName() + " is evolving! He is now level " + activeGame.getWinner().getLevel() + "!");
-    if(activeGame.grantLosingExp())
-      sendMessage(currentChannel, "What's this? " + activeGame.getLoser().getPlayerName() + " is evolving! He is now level " + activeGame.getLoser().getLevel() + "!");
+    levelUpWinner = activeGame.grantWinnngExp();
+    levelUpLoser = activeGame.grantLosingExp();
     activeGame.clearPlayers();
 
     players.put(activeGame.getWinner().getPlayerName(), activeGame.getWinner());
     players.put(activeGame.getLoser().getPlayerName(), activeGame.getLoser());
 
+    announcePostGame(levelUpWinner, levelUpLoser, currentChannel);
+    announcePostGame(levelUpWinner, levelUpLoser, BATTLE_CHAN);
+  }
 
+  private void announcePostGame(boolean levelUpWinner, boolean levelUpLoser, String channel) {
+    sendMessage(channel, activeGame.getLoser().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
+    sendMessage(channel, "CONGRATUALATIONS " + activeGame.getWinner().getPlayerName() + "! Youve won this game!");
+
+    sendMessage(channel, "!!!POST GAME!!!");
+    sendMessage(channel, activeGame.getWinner().getPlayerName() + " gained " + activeGame.getWinningExp() + "xp and "+activeGame.getLoser().getPlayerName() + " gained " + activeGame.getLosingExp() + "xp for fighting in this match");
+    if(levelUpWinner)
+      sendMessage(channel, "What's this? " + activeGame.getWinner().getPlayerName() + " is evolving! He is now level " + activeGame.getWinner().getLevel() + "!");
+    if(levelUpLoser)
+      sendMessage(channel, "What's this? " + activeGame.getLoser().getPlayerName() + " is evolving! He is now level " + activeGame.getLoser().getLevel() + "!");
   }
 
   private void playNextRound() {
     activeGame.startNextRound();
-    sendMessage(currentChannel, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
-    sendMessage(currentChannel, "...does " + activeGame.getLastResultingDamage() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
-    sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
+    sendMessage(BATTLE_CHAN, activeGame.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his opponent and...");
+    sendMessage(BATTLE_CHAN, "...does " + activeGame.getLastResultingDamage() + " damage to " + activeGame.getDefendingPlayer().getPlayerName());
+    sendMessage(BATTLE_CHAN, activeGame.getDefendingPlayer().getPlayerName() + " has " + activeGame.getDefendingPlayer().getCurrentHealth() + " health remaining.");
     activeGame.switchTurns();
   }
 
   private void startGame() {
 
     if(activeGame.StartMatch()){
-      sendMessage(currentChannel, "!!!MATCH STARTED!!!");
-      sendMessage(currentChannel, "Rolling the dice to see who gets to strike first...");
-      sendMessage(currentChannel, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
-      sendMessage(currentChannel, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
+      sendMessage(BATTLE_CHAN, "!!!MATCH STARTED!!!");
+      sendMessage(currentChannel, "!!!MATCH STARTED!!! Follow it over at #ithivemind-game");
+      sendMessage(BATTLE_CHAN, "Rolling the dice to see who gets to strike first...");
+      sendMessage(BATTLE_CHAN, "Aaaaand " + activeGame.getAttackingPlayer().getPlayerName() + " won the dice roll!");
+      sendMessage(BATTLE_CHAN, activeGame.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
     }
 
   }
