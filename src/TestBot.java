@@ -16,6 +16,7 @@ public class TestBot extends PircBot{
   private static final String OP_OWNER = "!op me";
   public static final String THE_TIME = "!time";
   public static final String LAST_MSG = "!lastmsg";
+  private static final String BATTLE_XP_LEVEL = "!battle nextlvl";
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
   private static String BATTLE_CHAN = "#ithivemind-game";
@@ -24,6 +25,7 @@ public class TestBot extends PircBot{
   private static String BATTLE_STATS = "!battle stats ";
   private static String BATTLE_NEXT_ROUND = "!battle next";
   private static String HELLO_STEAMDUCK = "hello steamduck";
+  private static String LOVE_STEAMDUCK = "<3 steamduck";
   private static String ECHO = "!echo ";
   Player playerOne, playerTwo;
   List<String> superAuthedUsers = new ArrayList<String>();
@@ -83,6 +85,9 @@ public class TestBot extends PircBot{
       String time = new java.util.Date().toString();
       sendMessage(channel, sender + ": The time is now " + time);
     }
+    if(message.equalsIgnoreCase(LOVE_STEAMDUCK)){
+      sendMessage(channel, "aaw. I love you too, " + sender + " <3 !");
+    }
     if(message.equalsIgnoreCase(OP_OWNER) && superAuthedUsers.contains(sender)){
       op(channel, sender);
     }
@@ -121,10 +126,11 @@ public class TestBot extends PircBot{
         };
         determineWinner();
       }
-
     }
-    else if(message.startsWith(BATTLE_NEXT_ROUND)){
-      playNextRound();
+    else if(message.equalsIgnoreCase(BATTLE_XP_LEVEL)){
+      Player player = players.get(sender);
+      String res =  player != null ? sender + " needs another " + player.getExpForNextLevel() + "xp to reach level " + (player.getLevel()+1) : sender + " not found in database";
+      sendMessage(channel, res);
     }
     else if(message.startsWith(BATTLE_STATS)){
       Player player = players.get(message.substring(BATTLE_STATS.length()));

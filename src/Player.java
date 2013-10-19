@@ -7,9 +7,8 @@ import java.util.Random;
  * Time: 4:23 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Player {
+public class Player implements java.io.Serializable {
   private int level;
-  private static int MAX_LEVEL = 100;
   private static int XP_NEEDED_FIRST_LEVEL = 69;
   private int totalExp;
   private String playerName;
@@ -21,7 +20,6 @@ public class Player {
   private int maxHealth;
   private boolean isAlive;
   private int currentHealth;
-  private Random playerRandomizer;
   private double damageMod;
   private int attackRating;
   private int xpNeededForLevel;
@@ -34,13 +32,11 @@ public class Player {
   public void CreateNewPlayer(String name){
     this.playerName = name;
     long rgenseed = System.currentTimeMillis();
-    playerRandomizer = new Random();
-    playerRandomizer.setSeed(rgenseed);
     isAlive = true;
-    initAttributes(playerRandomizer);
+    initAttributes();
   }
 
-  private void initAttributes(Random playerRandomizer) {
+  private void initAttributes() {
     level = 1;
     wins = 0;
     losses = 0;
@@ -125,6 +121,10 @@ public class Player {
       return true;
     }
     else return false;
+  }
+
+  public int getExpForNextLevel(){
+    return xpNeededForLevel - totalExp;
   }
 
   private void doLevelUp() {
