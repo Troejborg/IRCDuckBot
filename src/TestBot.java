@@ -17,6 +17,7 @@ public class TestBot extends PircBot{
   public static final String THE_TIME = "!time";
   public static final String LAST_MSG = "!lastmsg";
   private static final String BATTLE_XP_LEVEL = "!battle nextlvl";
+  private static final String CUPCAKE_BOT = "CupcakeStatbot";
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
   private static String BATTLE_CHAN = "#ithivemind-game";
@@ -60,9 +61,12 @@ public class TestBot extends PircBot{
 
     if(!users.contains(sender)){
       if(sender != getName())
-        sendMessage(channel, "Welcome to #ithivemind, " + sender + "! Enjoy your stay.");
+        sendMessage(channel, "Welcome to " + channel +", " + sender + "! Enjoy your stay.");
       else
         sendMessage(channel, "RAWR!");
+      if(sender.equalsIgnoreCase(CUPCAKE_BOT))
+        sendMessage(channel, "AIA(Artificial Intelligence Alert) - Let's give this one some power!");
+        op(channel, CUPCAKE_BOT);
 
       users.add(sender);
       Player steamduck = new Player("steamduck");
