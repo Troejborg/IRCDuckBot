@@ -1,4 +1,4 @@
-import java.util.Random;
+package Game;
 
 /**
  * Created with IntelliJ IDEA.

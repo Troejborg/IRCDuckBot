@@ -1,3 +1,5 @@
+package Game;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Troej_000
