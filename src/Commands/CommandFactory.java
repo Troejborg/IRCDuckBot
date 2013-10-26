@@ -1,5 +1,6 @@
 package Commands;
 
+import Game.BattleGame;
 import Game.Player;
 
 import java.util.ArrayList;
@@ -17,14 +18,14 @@ import java.util.Map;
 public class CommandFactory {
   private static String BATTLE = "!battle";
   private static String ADMIN = "!super";
-  private Map<String, Player> players;
+  BattleGame game;
   public CommandFactory(){
-    players = new HashMap<String, Player>();
+    game = new BattleGame();
   }
-  public Command getCommandType(String sender, String[] cmdStrings, String cmdString){
+  public Command getCommandType(String[] sender, String[] cmdStrings, String cmdString){
     String type = cmdStrings[0];
     if(type.equals(BATTLE))
-      return new BattleCommand(sender, cmdStrings, players);
+      return new BattleCommand(sender, cmdStrings, game);
     else return new DefaultCommand(sender, cmdString);
   }
 }

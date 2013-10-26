@@ -1,5 +1,7 @@
 package Game;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -13,18 +15,21 @@ public class BattleGame
 {
   private static int LEET_ROLLER = 1337;
   private Player attackingPlayer, defendingPlayer, winningPlayer, losingPlayer;
+  private Map<String, Player> playerList;
   private Random randomizer;
   public int RoundNumber;
-  private int lastDamageRoll, lastDefenseRoll, lastResultingDamage;
+  private int lastDamageRoll;
+  private double lastDefenseRoll;
+  private int lastResultingDamage;
   boolean isMatchOngoing = false;
   private int matchExpWin;
   private int matchExpLoss;
 
-  public BattleGame(Player playerOne, Player playerTwo){
+  public BattleGame(){
     long rgenseed = System.currentTimeMillis();
     randomizer = new Random();
     randomizer.setSeed(rgenseed);
-    rollStartingPositions(playerOne, playerTwo);
+    playerList = new HashMap<String, Player>();
   }
 
 
@@ -37,7 +42,11 @@ public class BattleGame
     return true;
   }
 
-  private void rollStartingPositions(Player playerOne, Player playerTwo) {
+  public Map<String,Player> getPlayerList(){
+    return playerList;
+}
+
+  public void rollStartingPositions(Player playerOne, Player playerTwo) {
     int startingPlayerRoll = randomizer.nextInt(LEET_ROLLER)%2;
     if(startingPlayerRoll == 0){
       attackingPlayer = playerOne;
@@ -57,23 +66,14 @@ public class BattleGame
   public Player getDefendingPlayer(){
     return defendingPlayer;
   }
-
-  public int getLastDamageRoll(){
-    return lastDamageRoll;
-  }
-
-  public int getLastDefenseRoll(){
-    return lastDefenseRoll;
-  }
-
   public int getLastResultingDamage(){
     return lastResultingDamage;
   }
 
   public void startNextRound(){
-    lastDamageRoll = randomizer.nextInt(LEET_ROLLER)%attackingPlayer.getDamageRating();
-    lastDefenseRoll = randomizer.nextInt(LEET_ROLLER)%defendingPlayer.getDefenseRating();
-    lastResultingDamage = lastDamageRoll - lastDefenseRoll > 0 ? lastDamageRoll - lastDefenseRoll : 0;
+    lastDamageRoll = randomizer.nextInt(LEET_ROLLER)%attackingPlayer.getDamagePotential();
+    lastDefenseRoll = randomizer.nextDouble()*defendingPlayer.getDefensePotential();
+    lastResultingDamage = (int) Math.round(lastDamageRoll*lastDefenseRoll);
     defendingPlayer.setIncomingDamage((lastResultingDamage));
 
     if(defendingPlayer.getCurrentHealth() <= 0)

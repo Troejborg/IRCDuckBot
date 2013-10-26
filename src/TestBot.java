@@ -49,9 +49,11 @@ public class TestBot extends PircBot{
     bot.joinChannel("#ithivemind");
     bot.joinChannel("#ithivemind-game");
 
+
   }
   protected void onConnect(){
     sendMessage("NickServ", "identify 200687");
+    setLogin("steamduck");
   }
   protected void onJoin(String channel, String sender, String login, String hostname) {
 
@@ -76,7 +78,8 @@ public class TestBot extends PircBot{
 
   public void onMessage(String channel, String sender,
                         String login, String hostname, String message) {
-    Command newCmd = cmdFactory.getCommandType(sender, splitMsg(message), message);
+    String[] senderInfo = {sender, login};
+    Command newCmd = cmdFactory.getCommandType(senderInfo, splitMsg(message), message);
 
     // Get main response
     Response response = newCmd.interpretCommand();

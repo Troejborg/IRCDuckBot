@@ -18,8 +18,8 @@ public class DefaultCommand implements Command {
   private String action;
   Response response;
 
-  public DefaultCommand(String sender, String cmdString) {
-    this.sender = sender;
+  public DefaultCommand(String[] sender, String cmdString) {
+    this.sender = sender[0];
     action = cmdString;
     response = new Response();
   }

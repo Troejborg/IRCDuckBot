@@ -8,29 +8,30 @@ package Game;
  * To change this template use File | Settings | File Templates.
  */
 public class Player implements java.io.Serializable {
+  private transient static int XP_NEEDED_FIRST_LEVEL = 69;
   private int level;
-  private static int XP_NEEDED_FIRST_LEVEL = 69;
   private int totalExp;
   private String playerName;
-  private Weapon weapon;
+  private String playerIdent;
+  private int weaponId;
   private int wins;
   private int losses;
-  private int damageRating;
-  private int defenseRating;
-  private int maxHealth;
-  private boolean isAlive;
-  private int currentHealth;
-  private double damageMod;
-  private int attackRating;
-  private int xpNeededForLevel;
-  private double defenseMod;
+  private int agility;
+  private int strength;
+  private int stamina;
+  private int endurance;
+  private transient int maxHealth;
+  private transient boolean isAlive;
+  private transient int currentHealth;
+  private transient int xpNeededForLevel;
 
-  public Player(String name){
-    CreateNewPlayer(name);
+  public Player(String[] playerInfo){
+    CreateNewPlayer(playerInfo);
   }
 
-  public void CreateNewPlayer(String name){
-    this.playerName = name;
+  public void CreateNewPlayer(String[] playerInfo){
+    this.playerName = playerInfo[0];
+    this.playerIdent = playerInfo[1];
     long rgenseed = System.currentTimeMillis();
     isAlive = true;
     initAttributes();
@@ -42,12 +43,11 @@ public class Player implements java.io.Serializable {
     losses = 0;
     totalExp = 0;
     xpNeededForLevel = XP_NEEDED_FIRST_LEVEL;
-    damageRating = 10;
-    defenseRating = 10;
-    maxHealth = 15;
-    currentHealth = maxHealth;
-    damageMod = 1.5;
-    defenseMod = 1;
+    agility = 10;
+    endurance = 10;
+    stamina = 20;
+    strength = 10;
+    currentHealth = stamina*10;
   }
 
   public int getCurrentHealth(){
@@ -61,19 +61,12 @@ public class Player implements java.io.Serializable {
     return playerName;
   }
 
-  public double getDamageMod() {
-    return damageMod;
+  public int getDamagePotential() {
+    return strength*5;
   }
 
-  public int getDamageRating() {
-    return damageRating*(int)damageMod;
-  }
-  public void setDamageRating(int dmg){
-    damageRating = dmg;
-  }
-
-  public int getDefenseRating() {
-    return defenseRating;
+  public double getDefensePotential() {
+    return (endurance*8)/100;
   }
 
   public void setIsAlive(boolean alive) {
@@ -129,27 +122,16 @@ public class Player implements java.io.Serializable {
 
   private void doLevelUp() {
     level++;
-    setDamageMod(damageMod * 1.2d);
-    setDefenseMod(defenseMod * 1.2d);
+    strength += 2;
+    stamina += 2;
+    endurance += 2;
+
     setMaxHealth(Math.round(maxHealth*1.2f));
   }
 
   private int getExpNeededForNextLevel(){
     return xpNeededForLevel - totalExp;
   }
-
-  public void setDamageMod(double damageMod) {
-    this.damageMod = damageMod;
-  }
-
-  public void setDefenseMod(double defenseMod) {
-    this.defenseMod = defenseMod;
-  }
-
-  public double getDefenseMod() {
-    return defenseMod;
-  }
-
   public void setMaxHealth(int maxHealth) {
     this.maxHealth = maxHealth;
   }
