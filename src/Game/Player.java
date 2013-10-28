@@ -8,32 +8,38 @@ package Game;
  * To change this template use File | Settings | File Templates.
  */
 public class Player implements java.io.Serializable {
+  private transient static final int HEALTH_MULTIPLIER = 10;
+  private transient static final int ENDURANCE_MULTIPLIER = 100;
+  private transient static final String XP_KEY = "xp";
+  private transient static final String NAME_KEY = "playername";
+  private transient static final String WINS_KEY = "wins";
+  private transient static final String LOSS_KEY = "loss";
+  private transient static final String AGI_KEY = "agility";
+  private transient static final String STR_KEY = "strength";
+  private transient static final String STA_KEY = "stamina";
+  private transient static final String ENDU_KEY = "endurance";
   private transient static int XP_NEEDED_FIRST_LEVEL = 69;
-  private int level;
-  private int totalExp;
-  private String playerName;
-  private String playerIdent;
+  private transient static String LEVEL_KEY = "level";
+  private transient int maxHealth;
+  private transient boolean isAlive = true;
+  private transient int currentHealth;
+  private transient int xpNeededForLevel;
+
   private int weaponId;
   private int wins;
   private int losses;
   private int agility;
+  private int level;
+  private int totalExp;
+  private String playerName;
   private int strength;
   private int stamina;
   private int endurance;
-  private transient int maxHealth;
-  private transient boolean isAlive;
-  private transient int currentHealth;
-  private transient int xpNeededForLevel;
 
-  public Player(String[] playerInfo){
-    CreateNewPlayer(playerInfo);
+  public Player(){
   }
-
-  public void CreateNewPlayer(String[] playerInfo){
-    this.playerName = playerInfo[0];
-    this.playerIdent = playerInfo[1];
-    long rgenseed = System.currentTimeMillis();
-    isAlive = true;
+  public Player(String playerName){
+    this.playerName = playerName;
     initAttributes();
   }
 
@@ -45,9 +51,9 @@ public class Player implements java.io.Serializable {
     xpNeededForLevel = XP_NEEDED_FIRST_LEVEL;
     agility = 10;
     endurance = 10;
-    stamina = 20;
-    strength = 10;
-    currentHealth = stamina*10;
+    stamina = 15;
+    strength = 15;
+    maxHealth = currentHealth = stamina*10;
   }
 
   public int getCurrentHealth(){
@@ -66,40 +72,11 @@ public class Player implements java.io.Serializable {
   }
 
   public double getDefensePotential() {
-    return (endurance*8)/100;
-  }
-
-  public void setIsAlive(boolean alive) {
-    isAlive = alive;
-  }
-
-  public boolean getIsAlive() {
-    return isAlive;
-  }
-
-  public void AddWin(){
-    wins++;
-  }
-
-  public void AddLoss(){
-    losses++;
-  }
-
-  public int getWins(){
-    return wins;
-  }
-  public int getLosses(){
-    return losses;
-  }
-  public void setLevel(int level){
-    this.level = level;
-  }
-  public int getLevel(){
-    return level;
+    return endurance/ENDURANCE_MULTIPLIER;
   }
 
   public int getMaxHealth() {
-    return maxHealth;
+    return stamina*10;
   }
 
   public void setCurrentHealth(int currentHealth) {
@@ -123,21 +100,101 @@ public class Player implements java.io.Serializable {
   private void doLevelUp() {
     level++;
     strength += 2;
-    stamina += 2;
+    stamina += 3;
     endurance += 2;
-
-    setMaxHealth(Math.round(maxHealth*1.2f));
   }
 
   private int getExpNeededForNextLevel(){
     return xpNeededForLevel - totalExp;
   }
-  public void setMaxHealth(int maxHealth) {
-    this.maxHealth = maxHealth;
-  }
 
   public void revitalize() {
-    setCurrentHealth(maxHealth);
+    setCurrentHealth(HEALTH_MULTIPLIER * stamina);
     setIsAlive(true);
+  }
+
+  public int getAgility() {
+    return agility;
+  }
+
+  public void setAgility(int agility) {
+    this.agility = agility;
+  }
+  public int getWeaponId() {
+    return weaponId;
+  }
+
+  public void setWeaponId(int weaponId) {
+    this.weaponId = weaponId;
+  }
+  public void setWins(int wins) {
+    this.wins = wins;
+  }
+  public void setLosses(int losses) {
+    this.losses = losses;
+  }
+
+  public int getStamina(){
+    return stamina;
+  }
+
+  public void setStamina(int stamina){
+    this.stamina = stamina;
+  }
+  public void setEndurance(int endurance){
+    this.endurance = endurance;
+  }
+  public int getEndurance(){
+    return endurance;
+  }
+  public int getStrength() {
+    return strength;
+  }
+
+  public void setStrength(int strength) {
+    this.strength = strength;
+  }
+
+  public void setName(String name){
+    this.playerName = name;
+  }
+
+  public String getName(){
+    return playerName;
+  }
+
+  public void AddWin(){
+    wins++;
+  }
+
+  public void AddLoss(){
+    losses++;
+  }
+
+  public int getWins(){
+    return wins;
+  }
+  public int getLosses(){
+    return losses;
+  }
+  public void setIsAlive(boolean alive) {
+    isAlive = alive;
+  }
+
+  public boolean getIsAlive() {
+    return isAlive;
+  }
+  public void setLevel(int level){
+    this.level = level;
+  }
+  public int getLevel(){
+    return level;
+  }
+
+  public int getTotalExp(){
+    return totalExp;
+  }
+  public void setTotalExp(int totalExp){
+    this.totalExp = totalExp;
   }
 }

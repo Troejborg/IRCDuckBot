@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class TestBot extends PircBot{
   private static final String BATTLE_XP_LEVEL = "!battle nextlvl";
+  private static final long MESSAGE_DELAY = 1500l;
   private static final String CUPCAKE_BOT = "CupcakeStatbot";
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
@@ -78,12 +79,18 @@ public class TestBot extends PircBot{
 
   public void onMessage(String channel, String sender,
                         String login, String hostname, String message) {
-    String[] senderInfo = {sender, login};
-    Command newCmd = cmdFactory.getCommandType(senderInfo, splitMsg(message), message);
+    if(message.equals("!debug")){
+      message = "!battle create";
+      sender = "steamduck_debug";
+    }
+
+      Command newCmd = cmdFactory.getCommandType(sender, splitMsg(message), message);
 
     // Get main response
     Response response = newCmd.interpretCommand();
     String targetChannel = response.Channel != null ? response.Channel : channel;
+    if(response.Messages.size() > 5)
+      setMessageDelay(MESSAGE_DELAY);
     for(String msg : response.Messages){
       sendMessage(targetChannel, msg);
     }
@@ -91,6 +98,8 @@ public class TestBot extends PircBot{
     // Check for additional messages
     Response additionalResponse = newCmd.getAdditionalMessages();
     if(additionalResponse != null){
+      if(additionalResponse.Messages.size() > 5)
+        setMessageDelay(MESSAGE_DELAY);
       targetChannel = additionalResponse.Channel != null ? additionalResponse.Channel : channel;
       for(String msg : additionalResponse.Messages){
         sendMessage(targetChannel, msg);

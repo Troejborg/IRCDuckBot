@@ -8,7 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="TestBot" level="project" />
-    <orderEntry type="library" name="json-simple-1.1.1" level="project" />
+    <orderEntry type="library" name="mysql-connector-java-5.1" level="project" />
+    <orderEntry type="library" name="google-gson-2.2" level="project" />
   </component>
 </module>
 

@@ -22,7 +22,7 @@ public class CommandFactory {
   public CommandFactory(){
     game = new BattleGame();
   }
-  public Command getCommandType(String[] sender, String[] cmdStrings, String cmdString){
+  public Command getCommandType(String sender, String[] cmdStrings, String cmdString){
     String type = cmdStrings[0];
     if(type.equals(BATTLE))
       return new BattleCommand(sender, cmdStrings, game);

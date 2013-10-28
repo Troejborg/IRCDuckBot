@@ -26,13 +26,13 @@ public class BattleCommand implements Command {
   private static String BATTLE_STATS = "stats";
   private static String BATTLE_NEXT_ROUND = "next";
   String targetPlayer, action;
-  String sender[];
+  String sender;
   Player playerOne, playerTwo;
   BattleGame game;
   Response response, additionalResponse;
   List<String> gameMessages;
 
-  public BattleCommand(String[] sender, String[] cmdStrings, BattleGame game) {
+  public BattleCommand(String sender, String[] cmdStrings, BattleGame game) {
     this.game = game;
     this.sender = sender;
     action = cmdStrings[1];
@@ -45,14 +45,14 @@ public class BattleCommand implements Command {
   public Response interpretCommand() {
     response.Messages.clear();
     if(action.equals(BATTLE_CREATE)){
-      if(game.getPlayerList().get(sender[HOST_NAME_INDEX]) == null){
-        game.getPlayerList().put(sender[HOST_NAME_INDEX], new Player(sender));
-        response.Messages.add(sender[PLAYER_NAME_INDEX] + " has been added to the player database");
+      if(game.getPlayerList().get(sender) == null){
+        game.getPlayerList().put(sender, new Player(sender));
+        response.Messages.add(sender + " has been added to the player database");
       }else
-        response.Messages.add(sender[PLAYER_NAME_INDEX] + " already exists in my database");
+        response.Messages.add(sender + " already exists in my database");
     }
     else if(action.equals(BATTLE_START)){
-      if(initGame(sender[HOST_NAME_INDEX], targetPlayer)){
+      if(initGame(sender, targetPlayer)){
         response.Channel = BATTLE_CHAN;
         startGame();
         while(!game.evalIsGameOver()){
@@ -63,8 +63,8 @@ public class BattleCommand implements Command {
       }
     }
     else if(action.equals(BATTLE_XP_LEVEL)){
-      Player player = game.getPlayerList().get(sender[PLAYER_NAME_INDEX]);
-      String res =  player != null ? player.getPlayerName() + " needs another " + player.getExpForNextLevel() + "xp to reach level " + (player.getLevel()+1) : sender[PLAYER_NAME_INDEX] + " not found in database";
+      Player player = game.getPlayerList().get(sender);
+      String res =  player != null ? player.getPlayerName() + " needs another " + player.getExpForNextLevel() + "xp to reach level " + (player.getLevel()+1) : sender + " not found in database";
       response.Messages.add(res);
     }
     else if(action.equals(BATTLE_STATS)){
@@ -84,7 +84,7 @@ public class BattleCommand implements Command {
 
   private void playNextRound() {
     game.startNextRound();
-    response.Messages.add(game.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his targetPlayer and...");
+    response.Messages.add(game.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his target and...");
     response.Messages.add("...does " + game.getLastResultingDamage() + " damage to " + game.getDefendingPlayer().getPlayerName());
     response.Messages.add(game.getDefendingPlayer().getPlayerName() + " has " + game.getDefendingPlayer().getCurrentHealth() + " health remaining.");
     game.switchTurns();

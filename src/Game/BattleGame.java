@@ -18,7 +18,7 @@ public class BattleGame
   private Map<String, Player> playerList;
   private Random randomizer;
   public int RoundNumber;
-  private int lastDamageRoll;
+  private double lastDamageRoll;
   private double lastDefenseRoll;
   private int lastResultingDamage;
   boolean isMatchOngoing = false;
@@ -71,8 +71,8 @@ public class BattleGame
   }
 
   public void startNextRound(){
-    lastDamageRoll = randomizer.nextInt(LEET_ROLLER)%attackingPlayer.getDamagePotential();
-    lastDefenseRoll = randomizer.nextDouble()*defendingPlayer.getDefensePotential();
+    lastDamageRoll = attackingPlayer.getDamagePotential()*0.5 + (Math.random() * (attackingPlayer.getDamagePotential()*2 - attackingPlayer.getDamagePotential()*0.5));
+    lastDefenseRoll = defendingPlayer.getDefensePotential() + (Math.random() * (0.9 - defendingPlayer.getDefensePotential()));
     lastResultingDamage = (int) Math.round(lastDamageRoll*lastDefenseRoll);
     defendingPlayer.setIncomingDamage((lastResultingDamage));
 
