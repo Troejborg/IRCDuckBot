@@ -29,8 +29,8 @@ public class GameDataProvider {
   }
 
   //  Database credentials
-  static final String USER = "ronnie";
-  static final String PASS = "SGnVJHNnGY5ZVexs";
+  static final String USER = "user";
+  static final String PASS = "pass";
 
   private Map<String, Player> playerList;
   private FutureTask<Map<String, Player>> downloadDataTask;
