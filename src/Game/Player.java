@@ -10,16 +10,8 @@ package Game;
 public class Player implements java.io.Serializable {
   private transient static final int HEALTH_MULTIPLIER = 10;
   private transient static final int ENDURANCE_MULTIPLIER = 100;
-  private transient static final String XP_KEY = "xp";
-  private transient static final String NAME_KEY = "playername";
-  private transient static final String WINS_KEY = "wins";
-  private transient static final String LOSS_KEY = "loss";
-  private transient static final String AGI_KEY = "agility";
-  private transient static final String STR_KEY = "strength";
-  private transient static final String STA_KEY = "stamina";
-  private transient static final String ENDU_KEY = "endurance";
+
   private transient static int XP_NEEDED_FIRST_LEVEL = 69;
-  private transient static String LEVEL_KEY = "level";
   private transient int maxHealth;
   private transient boolean isAlive = true;
   private transient int currentHealth;
@@ -35,6 +27,7 @@ public class Player implements java.io.Serializable {
   private int strength;
   private int stamina;
   private int endurance;
+  private int playerID;
 
   public Player(){
   }
@@ -196,5 +189,13 @@ public class Player implements java.io.Serializable {
   }
   public void setTotalExp(int totalExp){
     this.totalExp = totalExp;
+  }
+
+  public int getPlayerID() {
+    return playerID;
+  }
+
+  public void setPlayerID(int playerID) {
+    this.playerID = playerID;
   }
 }

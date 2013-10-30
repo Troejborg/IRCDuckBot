@@ -97,6 +97,8 @@ public class BattleCommand implements Command {
       response.Messages.add("No player named " + (playerOne == null ? playerOneName : playerTwoName) + " found in database. To create yourself type '!battle create'");
       return false;
     }else{
+      playerOne.revitalize();
+      playerTwo.revitalize();
       game.rollStartingPositions(playerOne, playerTwo);
       return true;
     }
@@ -117,10 +119,7 @@ public class BattleCommand implements Command {
     game.setMatchExp();
     levelUpWinner = game.grantWinnngExp();
     levelUpLoser = game.grantLosingExp();
-    game.clearPlayers();
 
-    game.getPlayerList().put(game.getWinner().getPlayerName(), game.getWinner());
-    game.getPlayerList().put(game.getLoser().getPlayerName(), game.getLoser());
 
     response.Messages.addAll(announcePostGame(levelUpWinner, levelUpLoser));
     additionalResponse.Messages.addAll(announcePostGame(levelUpWinner, levelUpLoser));

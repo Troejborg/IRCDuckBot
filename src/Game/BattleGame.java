@@ -15,7 +15,6 @@ public class BattleGame
 {
   private static int LEET_ROLLER = 1337;
   private Player attackingPlayer, defendingPlayer, winningPlayer, losingPlayer;
-  private Map<String, Player> playerList;
   private Random randomizer;
   public int RoundNumber;
   private double lastDamageRoll;
@@ -24,26 +23,28 @@ public class BattleGame
   boolean isMatchOngoing = false;
   private int matchExpWin;
   private int matchExpLoss;
-
+  GameDataProvider provider;
+  Object syncObj = new Object();
   public BattleGame(){
     long rgenseed = System.currentTimeMillis();
+    provider = new GameDataProvider();
+    provider.fetchPlayers();
     randomizer = new Random();
     randomizer.setSeed(rgenseed);
-    playerList = new HashMap<String, Player>();
   }
 
 
   public boolean StartMatch(){
-    if(isMatchOngoing)
-      return false;
-    else
-      isMatchOngoing = true;
-    RoundNumber = 0;
-    return true;
+      if(isMatchOngoing)
+        return false;
+      else
+        isMatchOngoing = true;
+      RoundNumber = 0;
+      return true;
   }
 
   public Map<String,Player> getPlayerList(){
-    return playerList;
+    return provider.getPlayers();
 }
 
   public void rollStartingPositions(Player playerOne, Player playerTwo) {
@@ -96,20 +97,32 @@ public class BattleGame
       winningPlayer = attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
       losingPlayer = !attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
       isMatchOngoing = false;
+
+      saveGame();
       return true;
     }
   }
 
+  private void saveGame() {
+    clearPlayers();
+
+    getPlayerList().put(getWinner().getPlayerName(), getWinner());
+    getPlayerList().put(getLoser().getPlayerName(), getLoser());
+
+    provider.storePlayers();
+  }
+
   public void setMatchExp(){
     // TODO : FIX THIS
-    float multiplier = 1+(losingPlayer.getLevel()-winningPlayer.getLevel())*0.1f;
-    multiplier = multiplier >= 0 ? multiplier : 0;
+    float winningPlayermultiplier = 1 + (losingPlayer.getLevel()-winningPlayer.getLevel())*0.2f;
+    float losingPlayerMultiplier = 1 + (winningPlayer.getLevel()-losingPlayer.getLevel())*0.2f;
+    matchExpWin = winningPlayer.getLevel()*5 + 40;
+    matchExpWin = Math.round(matchExpWin*winningPlayermultiplier);
+    matchExpWin = matchExpWin > 0 ? matchExpWin : 0;
 
-    matchExpWin = winningPlayer.getLevel()*5 + 45;
-    matchExpWin = Math.round(matchExpWin*multiplier);
-
-    matchExpLoss = losingPlayer.getLevel()*5 + 15;
-    matchExpLoss = Math.round(matchExpLoss*multiplier);
+    matchExpLoss = losingPlayer.getLevel()*3 + 25;
+    matchExpLoss = Math.round(matchExpLoss*losingPlayerMultiplier);
+    matchExpLoss = matchExpLoss > 0 ? matchExpLoss : 0;
   }
 
   public int getWinningExp(){
