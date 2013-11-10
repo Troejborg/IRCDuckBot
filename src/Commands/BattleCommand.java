@@ -1,13 +1,10 @@
-package Commands;
+package commands;
 
-import Commands.Command;
-import Game.BattleGame;
-import Game.Player;
+import game.BattleGame;
+import game.Player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -64,13 +61,14 @@ public class BattleCommand implements Command {
     }
     else if(action.equals(BATTLE_XP_LEVEL)){
       Player player = game.getPlayerList().get(sender);
-      String res =  player != null ? player.getPlayerName() + " needs another " + player.getExpForNextLevel() + "xp to reach level " + (player.getLevel()+1) : sender + " not found in database";
+      int nextLvl = player.Level +1;
+      String res =  player != null ? player.PlayerName + " needs another " + player.getExpForNextLevel() + "xp to reach level " + nextLvl : sender + " not found in database";
       response.Messages.add(res);
     }
     else if(action.equals(BATTLE_STATS)){
       Player player = game.getPlayerList().get(targetPlayer);
       if(player != null)
-        response.Messages.add(player.getPlayerName() + " is level " + player.getLevel() + ", has " + player.getWins() + " wins and " + player.getLosses() + " losses.");
+        response.Messages.add(player.PlayerName + " is level " + player.Level + ", has " + player.Wins + " wins and " + player.Losses + " losses.");
       else
         response.Messages.add("Could not find player in database");
     }
@@ -84,9 +82,9 @@ public class BattleCommand implements Command {
 
   private void playNextRound() {
     game.startNextRound();
-    response.Messages.add(game.getAttackingPlayer().getPlayerName() + " charges forward! He launches towards his target and...");
-    response.Messages.add("...does " + game.getLastResultingDamage() + " damage to " + game.getDefendingPlayer().getPlayerName());
-    response.Messages.add(game.getDefendingPlayer().getPlayerName() + " has " + game.getDefendingPlayer().getCurrentHealth() + " health remaining.");
+    response.Messages.add(game.getAttackingPlayer().PlayerName + " charges forward! He launches towards his target and...");
+    response.Messages.add("...does " + game.getLastResultingDamage() + " damage to " + game.getDefendingPlayer().PlayerName);
+    response.Messages.add(game.getDefendingPlayer().PlayerName + " has " + game.getDefendingPlayer().getCurrentHealth() + " health remaining.");
     game.switchTurns();
   }
 
@@ -109,8 +107,8 @@ public class BattleCommand implements Command {
       response.Messages.add("!!!MATCH STARTED!!!");
       response.Messages.add("!!!MATCH STARTED!!! Follow it over at #ithivemind-game");
       response.Messages.add("Rolling the dice to see who gets to strike first...");
-      response.Messages.add("Aaaaand " + game.getAttackingPlayer().getPlayerName() + " won the dice roll!");
-      response.Messages.add(game.getDefendingPlayer().getPlayerName() + " is getting ready to defend...");
+      response.Messages.add("Aaaaand " + game.getAttackingPlayer().PlayerName + " won the dice roll!");
+      response.Messages.add(game.getDefendingPlayer().PlayerName + " is getting ready to defend...");
     }
   }
 
@@ -120,6 +118,7 @@ public class BattleCommand implements Command {
     levelUpWinner = game.grantWinnngExp();
     levelUpLoser = game.grantLosingExp();
 
+    game.save();
 
     response.Messages.addAll(announcePostGame(levelUpWinner, levelUpLoser));
     additionalResponse.Messages.addAll(announcePostGame(levelUpWinner, levelUpLoser));
@@ -127,15 +126,15 @@ public class BattleCommand implements Command {
 
   private List<String> announcePostGame(boolean levelUpWinner, boolean levelUpLoser) {
     List<String> result = new ArrayList<String>();
-    result.add(game.getLoser().getPlayerName() + " has suffered a gruesome death :( Rest in Pieces.");
-    result.add("CONGRATUALATIONS " + game.getWinner().getPlayerName() + "! Youve won this game!");
+    result.add(game.getLoser().PlayerName + " has suffered a gruesome death :( Rest in Pieces.");
+    result.add("CONGRATUALATIONS " + game.getWinner().PlayerName + "! Youve won this game!");
 
     result.add("!!!POST GAME!!!");
-    result.add(game.getWinner().getPlayerName() + " gained " + game.getWinningExp() + "xp and " + game.getLoser().getPlayerName() + " gained " + game.getLosingExp() + "xp for fighting in this match");
+    result.add(game.getWinner().PlayerName + " gained " + game.getWinningExp() + "xp and " + game.getLoser().PlayerName + " gained " + game.getLosingExp() + "xp for fighting in this match");
     if(levelUpWinner)
-      result.add("What's this? " + game.getWinner().getPlayerName() + " is evolving! He is now level " + game.getWinner().getLevel() + "!");
+      result.add("What's this? " + game.getWinner().PlayerName + " is evolving! He is now level " + game.getWinner().Level + "!");
     if(levelUpLoser)
-      result.add("What's this? " + game.getLoser().getPlayerName() + " is evolving! He is now level " + game.getLoser().getLevel() + "!");
+      result.add("What's this? " + game.getLoser().PlayerName + " is evolving! He is now level " + game.getLoser().Level + "!");
 
     return result;
   }

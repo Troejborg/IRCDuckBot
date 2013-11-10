@@ -1,6 +1,15 @@
-package Game;
+package game;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.ValueEventListener;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -23,17 +32,37 @@ public class BattleGame
   boolean isMatchOngoing = false;
   private int matchExpWin;
   private int matchExpLoss;
-  GameDataProvider provider;
-  Object syncObj = new Object();
+  private Map<String, Player> playerList;
+  private Firebase ref;
   public BattleGame(){
     long rgenseed = System.currentTimeMillis();
-    provider = new GameDataProvider();
-    provider.fetchPlayers();
     randomizer = new Random();
     randomizer.setSeed(rgenseed);
+    playerList = new HashMap<String, Player>();
+
+    // Create a reference to a Firebase location
+    ref = new Firebase("https://steamduck.firebaseIO.com/players");
+
+    // Read data and react to changes
+    ref.addValueEventListener(new ValueEventListener() {
+
+      @Override
+      public void onDataChange(DataSnapshot snap) {
+        if(snap.getValue() != null){
+          GsonBuilder gsonBuilder = new GsonBuilder();
+          Gson gson = gsonBuilder.create();
+          Type type = new TypeToken<Map<String, Player>>(){}.getType();
+          String json = gson.toJson(snap.getValue());
+          playerList = gson.fromJson(json, type);
+          System.out.print(playerList);
+        }
+      }
+
+      @Override public void onCancelled() {
+
+      }
+    });
   }
-
-
   public boolean StartMatch(){
       if(isMatchOngoing)
         return false;
@@ -44,7 +73,7 @@ public class BattleGame
   }
 
   public Map<String,Player> getPlayerList(){
-    return provider.getPlayers();
+    return playerList;
 }
 
   public void rollStartingPositions(Player playerOne, Player playerTwo) {
@@ -97,30 +126,26 @@ public class BattleGame
       winningPlayer = attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
       losingPlayer = !attackingPlayer.getIsAlive() ? attackingPlayer : defendingPlayer;
       isMatchOngoing = false;
-
-      saveGame();
       return true;
     }
   }
 
-  private void saveGame() {
+  public void save() {
     clearPlayers();
 
-    getPlayerList().put(getWinner().getPlayerName(), getWinner());
-    getPlayerList().put(getLoser().getPlayerName(), getLoser());
-
-    provider.storePlayers();
+    getPlayerList().put(getWinner().PlayerName, getWinner());
+    getPlayerList().put(getLoser().PlayerName, getLoser());
+    ref.setValue(playerList);
   }
 
   public void setMatchExp(){
-    // TODO : FIX THIS
-    float winningPlayermultiplier = 1 + (losingPlayer.getLevel()-winningPlayer.getLevel())*0.2f;
-    float losingPlayerMultiplier = 1 + (winningPlayer.getLevel()-losingPlayer.getLevel())*0.2f;
-    matchExpWin = winningPlayer.getLevel()*5 + 40;
+    float winningPlayermultiplier = 1 + (losingPlayer.Level-winningPlayer.Level)*0.2f;
+    float losingPlayerMultiplier = 1 + (winningPlayer.Level-losingPlayer.Level)*0.2f;
+    matchExpWin = winningPlayer.Level*5 + 40;
     matchExpWin = Math.round(matchExpWin*winningPlayermultiplier);
     matchExpWin = matchExpWin > 0 ? matchExpWin : 0;
 
-    matchExpLoss = losingPlayer.getLevel()*3 + 25;
+    matchExpLoss = losingPlayer.Level*3 + 25;
     matchExpLoss = Math.round(matchExpLoss*losingPlayerMultiplier);
     matchExpLoss = matchExpLoss > 0 ? matchExpLoss : 0;
   }
@@ -133,12 +158,12 @@ public class BattleGame
     return matchExpLoss;
   }
   public boolean grantWinnngExp(){
-    winningPlayer.AddWin();
+    winningPlayer.Wins++;
     return winningPlayer.grantExp(matchExpWin);
   }
 
   public boolean grantLosingExp(){
-    losingPlayer.AddLoss();
+    losingPlayer.Losses++;
     return losingPlayer.grantExp(matchExpLoss);
   }
 

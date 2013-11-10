@@ -1,6 +1,4 @@
-package Commands;
-
-import java.util.List;
+package commands;
 
 /**
  * Created with IntelliJ IDEA.

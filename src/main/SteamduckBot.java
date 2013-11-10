@@ -1,34 +1,48 @@
-import Commands.Command;
-import Commands.CommandFactory;
-import Game.Player;
-import Commands.Response;
+package main;
+
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.ValueEventListener;
+import commands.Command;
+import commands.CommandFactory;
+import commands.Response;
 import org.jibble.pircbot.PircBot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * User: rt
  * Date: 10/11/13
  * Time: 7:26 AM
- * To change this template use File | Settings | File Templates.
+ * Steamduck Apps | 2013 | All rights reserved
  */
-public class TestBot extends PircBot{
+public class SteamduckBot extends PircBot{
   private static final String BATTLE_XP_LEVEL = "!battle nextlvl";
   private static final long MESSAGE_DELAY = 1500l;
-  private static final String CUPCAKE_BOT = "CupcakeStatbot";
+  private String CUPCAKE_BOT;
   String lastMsg = "null", lastSender = "null";
   private String currentChannel = "#ithivemind";
-  Player playerOne, playerTwo;
-  List<String> superAuthedUsers = new ArrayList<String>();
-  List<String> authedUsers = new ArrayList<String>();
   List<String> users = new ArrayList<String>();
   CommandFactory cmdFactory;
+  Firebase ref;
+  private String ident;
 
-  public TestBot() {
-    this.setName("steamduck_debug");
-    superAuthedUsers.add("lite_");
+  public SteamduckBot() {
+    this.setName("steamduck");
+    ref = new Firebase("https://steamduck.firebaseIO.com");
+    ref.addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        CUPCAKE_BOT = dataSnapshot.child("friend").getValue().toString();
+        ident = dataSnapshot.child("ident").getValue().toString();
+      }
+
+      @Override
+      public void onCancelled() {
+
+      }
+    });
     cmdFactory = new CommandFactory();
   }
 
@@ -38,7 +52,7 @@ public class TestBot extends PircBot{
 
   public static void main(String[] args) throws Exception {
     // Now start our bot up.
-    TestBot bot = new TestBot();
+    SteamduckBot bot = new SteamduckBot();
 
     // Enable debugging output.
     bot.setVerbose(true);
@@ -53,7 +67,7 @@ public class TestBot extends PircBot{
 
   }
   protected void onConnect(){
-    sendMessage("NickServ", "identify 200687");
+    sendMessage("NickServ", "identify " + ident);
     setLogin("steamduck");
   }
   protected void onJoin(String channel, String sender, String login, String hostname) {
