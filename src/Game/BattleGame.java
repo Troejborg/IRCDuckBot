@@ -140,11 +140,11 @@ public class BattleGame
 
   public void setMatchExp(){
     float winningPlayermultiplier = 1 + (losingPlayer.Level-winningPlayer.Level)*0.2f;
-    float losingPlayerMultiplier = 1 + (winningPlayer.Level-losingPlayer.Level)*0.2f;
     matchExpWin = winningPlayer.Level*5 + 40;
     matchExpWin = Math.round(matchExpWin*winningPlayermultiplier);
     matchExpWin = matchExpWin > 0 ? matchExpWin : 0;
 
+    float losingPlayerMultiplier = 1 + (winningPlayer.Level-losingPlayer.Level)*0.2f;
     matchExpLoss = losingPlayer.Level*3 + 25;
     matchExpLoss = Math.round(matchExpLoss*losingPlayerMultiplier);
     matchExpLoss = matchExpLoss > 0 ? matchExpLoss : 0;
